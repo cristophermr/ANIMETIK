@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimeTik</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Top Bar Search -->
+    <div class="top-bar">
+        <div class="branding">
+            <h1 class="logo-text">ANIME<span>TIK</span></h1>
+        </div>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Buscar anime...">
+            <select id="statusFilter">
+                <option value="">Status</option>
+                <option value="1">Airing</option>
+                <option value="2">Done</option>
+            </select>
+            <button class="icon-btn" onclick="performSearch()"><i class="fas fa-search"></i></button>
+            <button class="icon-btn" onclick="toggleAgenda()" title="Ver Agenda"><i
+                    class="fas fa-calendar-alt"></i></button>
+        </div>
+    </div>
+
+    <!-- Agenda (Por Días) -->
+    <div id="airingFeed" class="agenda-container">
+        <!-- Day sections injected by JS -->
+    </div>
+
+    <!-- Main Vertical Feed -->
+    <div class="feed-container" id="animeFeed">
+        <!-- Slides injected by JS -->
+    </div>
+
+    <!-- Modal Video Player -->
+    <div id="videoModal" class="modal" style="z-index: 250;">
+        <div class="modal-content"
+            style="padding:0; background:black; display:flex; flex-direction:column; height: 80vh;">
+            <div class="video-header">
+                <div class="video-nav-btns">
+                    <button class="glass-btn" onclick="backToAnimeProfile()"><i class="fas fa-list"></i>
+                        Episodios</button>
+                    <button class="glass-btn" onclick="nextEpisode()"><i class="fas fa-forward"></i> Siguiente</button>
+                </div>
+                <span id="videoTitle"
+                    style="color:white; font-weight:bold; flex:1; text-align:center;">Reproduciendo</span>
+                <span class="close-btn" onclick="closeVideoModal()"
+                    style="color:white; font-size:24px; cursor:pointer;">&times;</span>
+            </div>
+            <div id="serverList"
+                style="padding: 10px; background: #1a1a1a; display: flex; overflow-x: auto; gap: 10px;"></div>
+            <div style="flex:1; position:relative; background: #000;">
+                <iframe id="videoFrame" src="" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Perfil/Episodios -->
+    <div id="episodesModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle" style="margin-bottom:10px;">Título</h2>
+            <p id="modalSynopsis" style="color:#aaa; font-size:0.9rem; margin-bottom:20px;">Sinopsis...</p>
+            <h3 style="margin-bottom:15px;">Episodios</h3>
+            <div id="episodesList"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
