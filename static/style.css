@@ -276,15 +276,9 @@ body {
     color: #aaa;
 }
 
-/* Last Watched */
-.last-watched {
-    font-size: 0.6rem;
-    color: var(--secondary-color);
-    margin-top: 2px;
-}
-
 /* Feed Container */
 .feed-container {
+    height: 100vh;
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
@@ -497,4 +491,156 @@ body {
     gap: 15px;
     font-size: 1.2rem;
     color: #888;
+}
+
+/* Favorites Delete Button */
+.fav-delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 0, 80, 0.8);
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.search-result-item {
+    position: relative;
+    /* Ensure delete btn is positioned correctly */
+}
+
+.search-result-item:hover .fav-delete-btn {
+    display: flex;
+}
+
+.fav-delete-btn:hover {
+    background: var(--secondary-color);
+    transform: scale(1.1);
+}
+
+/* Watched Episode Style */
+.episode-item.watched {
+    background: rgba(0, 242, 234, 0.05);
+    border-left: 3px solid var(--primary-color);
+}
+
+/* Main Footer */
+.main-footer {
+    background: #0a0a0a;
+    padding: 40px 20px;
+    margin-top: 50px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.footer-section h4 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.footer-section p {
+    color: #888;
+    line-height: 1.6;
+    font-size: 0.9rem;
+}
+
+.footer-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+    margin: 30px 0;
+}
+
+.footer-bottom p {
+    color: #555;
+    font-size: 0.8rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .anime-title {
+        font-size: 1.8rem;
+    }
+
+    .top-bar {
+        padding: 10px;
+    }
+
+    .search-container {
+        max-width: 100%;
+        gap: 5px;
+    }
+
+    .logo-text {
+        font-size: 1.5rem;
+    }
+
+    .anime-info {
+        padding: 20px 15px 120px 15px;
+    }
+
+    .modal {
+        height: 90vh;
+    }
+
+    .search-results-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .view-profile-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .day-header {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .anime-title {
+        font-size: 1.5rem;
+    }
+
+    .search-container {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    #searchInput {
+        width: 100%;
+        order: 1;
+    }
+
+    #statusFilter {
+        order: 2;
+        flex: 1;
+        padding: 8px;
+    }
+
+    .top-bar .icon-btn {
+        order: 3;
+        width: 35px;
+        height: 35px;
+    }
 }

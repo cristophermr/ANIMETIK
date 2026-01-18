@@ -24,22 +24,79 @@ function getWatchHistory() {
 
 function saveWatched(animeSlug, episodeNum) {
     const history = getWatchHistory();
-    history[animeSlug] = { episode: episodeNum, timestamp: Date.now() };
+    if (!history[animeSlug]) {
+        history[animeSlug] = { episodes: [], timestamp: Date.now() };
+    }
+    if (!history[animeSlug].episodes.includes(episodeNum)) {
+        history[animeSlug].episodes.push(episodeNum);
+    }
+    history[animeSlug].timestamp = Date.now();
     localStorage.setItem('watchHistory', JSON.stringify(history));
+}
+
+function isEpisodeWatched(animeSlug, episodeNum) {
+    const history = getWatchHistory();
+    return history[animeSlug] && history[animeSlug].episodes.includes(episodeNum);
 }
 
 function getLastWatched(animeSlug) {
     const history = getWatchHistory();
-    return history[animeSlug] || null;
+    const data = history[animeSlug];
+    if (data && data.episodes && data.episodes.length > 0) {
+        // Return latest episode in array or based on some logic. 
+        // For simplicity, we just return the most recently added or the highest.
+        return { episode: Math.max(...data.episodes) };
+    }
+    return null;
+}
+
+// Favorites (localStorage)
+function getFavorites() {
+    try {
+        let favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+        // Auto-cleanup corrupted entries
+        return favs.filter(f => f && f.slug && f.slug !== 'undefined');
+    } catch { return []; }
+}
+
+window.clearAllFavorites = function () {
+    if (confirm('¿Estás seguro de que quieres borrar todos tus favoritos?')) {
+        localStorage.setItem('favorites', '[]');
+        renderFavorites();
+    }
+}
+
+function toggleFavorite(anime) {
+    let favorites = getFavorites();
+    const index = favorites.findIndex(f => f.slug === anime.slug);
+    if (index > -1) {
+        favorites.splice(index, 1);
+    } else {
+        favorites.push({
+            slug: anime.slug,
+            title: anime.title,
+            image_url: anime.image_url,
+            type: anime.type
+        });
+    }
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    renderFavorites();
+}
+
+function isFavorite(slug) {
+    const favorites = getFavorites();
+    return favorites.some(f => f.slug === slug);
 }
 
 // Toggle Agenda visibility with back button
 window.toggleAgenda = function () {
     const agenda = document.getElementById('airingFeed');
+    const favorites = document.getElementById('favoritesFeed');
     const feed = document.getElementById('animeFeed');
 
     if (agenda.style.display === 'none' || !agenda.style.display) {
         agenda.style.display = 'block';
+        if (favorites) favorites.style.display = 'none';
         feed.style.display = 'none';
     } else {
         agenda.style.display = 'none';
@@ -47,11 +104,29 @@ window.toggleAgenda = function () {
     }
 };
 
+window.toggleFavorites = function () {
+    const favorites = document.getElementById('favoritesFeed');
+    const agenda = document.getElementById('airingFeed');
+    const feed = document.getElementById('animeFeed');
+
+    if (favorites.style.display === 'none' || !favorites.style.display) {
+        favorites.style.display = 'block';
+        if (agenda) agenda.style.display = 'none';
+        feed.style.display = 'none';
+        renderFavorites();
+    } else {
+        favorites.style.display = 'none';
+        feed.style.display = 'block';
+    }
+};
+
 // Back to Feed
 window.backToFeed = function () {
     const agenda = document.getElementById('airingFeed');
+    const favorites = document.getElementById('favoritesFeed');
     const feed = document.getElementById('animeFeed');
-    agenda.style.display = 'none';
+    if (agenda) agenda.style.display = 'none';
+    if (favorites) favorites.style.display = 'none';
     feed.style.display = 'block';
 };
 
@@ -72,15 +147,18 @@ function startAutoScroll() {
     }, 5000); // Every 5 seconds
 }
 
+let resumeTimeout = null;
+
 // Stop auto-scroll on user interaction
-feedContainer?.addEventListener('touchstart', () => {
+function handleUserInteraction() {
     clearInterval(autoScrollInterval);
-    setTimeout(startAutoScroll, 10000); // Resume after 10s of inactivity
-});
-feedContainer?.addEventListener('wheel', () => {
-    clearInterval(autoScrollInterval);
-    setTimeout(startAutoScroll, 10000);
-});
+    if (resumeTimeout) clearTimeout(resumeTimeout);
+    resumeTimeout = setTimeout(startAutoScroll, 10000); // Resume after 10s of inactivity
+}
+
+feedContainer?.addEventListener('touchstart', handleUserInteraction);
+feedContainer?.addEventListener('wheel', handleUserInteraction);
+feedContainer?.addEventListener('mousedown', handleUserInteraction); // Also for desktop click-drag
 
 
 // Search
@@ -170,13 +248,16 @@ function renderAnimes(animes) {
 function renderSearchResults(animes) {
     feedContainer.innerHTML = '';
 
+    const backBtn = document.createElement('button');
+    backBtn.className = 'back-to-feed-btn bottom-btn';
+    backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Volver al Feed';
+    backBtn.onclick = () => {
+        searchInput.value = '';
+        fetchFeed();
+    };
+
     if (!animes || animes.length === 0) {
         feedContainer.innerHTML = '<div class="loading-screen" style="height:50vh;"><h2>No se encontraron resultados</h2></div>';
-
-        const backBtn = document.createElement('button');
-        backBtn.className = 'back-to-feed-btn bottom-btn';
-        backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Volver al Feed';
-        backBtn.onclick = () => { searchInput.value = ''; fetchFeed(); };
         feedContainer.appendChild(backBtn);
         return;
     }
@@ -197,16 +278,61 @@ function renderSearchResults(animes) {
     });
 
     feedContainer.appendChild(grid);
-
-    // Add back button at the bottom
-    const backBtn = document.createElement('button');
-    backBtn.className = 'back-to-feed-btn bottom-btn';
-    backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Volver al Feed';
-    backBtn.onclick = () => {
-        searchInput.value = '';
-        fetchFeed();
-    };
     feedContainer.appendChild(backBtn);
+}
+
+function renderFavorites() {
+    const list = document.getElementById('favoritesList');
+    if (!list) return;
+
+    const favorites = getFavorites();
+    list.innerHTML = '';
+
+    if (favorites.length === 0) {
+        list.innerHTML = `
+            <div style="grid-column: 1/-1; padding: 40px; text-align: center; color: #888;">
+                No tienes animes favoritos aún.
+            </div>`;
+        return;
+    }
+
+    // Add Clear All button if there are items
+    const clearBar = document.createElement('div');
+    clearBar.style = 'grid-column: 1/-1; text-align: right; margin-bottom: 20px;';
+    clearBar.innerHTML = `
+        <button onclick="clearAllFavorites()" class="glass-btn" style="color:var(--secondary-color); border-color:var(--secondary-color);">
+            <i class="fas fa-trash-alt"></i> Borrar Lista
+        </button>
+    `;
+    list.appendChild(clearBar);
+
+    favorites.forEach(anime => {
+        // Skip corrupted entries from previous bug
+        if (!anime.slug || anime.slug === 'undefined') return;
+
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        // Use an anonymous function to ensure slug is passed as string correctly
+        item.onclick = () => openProfile(anime.slug, anime.title);
+
+        item.innerHTML = `
+            <img src="${anime.image_url}" alt="${anime.title}">
+            <div class="search-result-title">${anime.title}</div>
+            <div class="search-result-type">${anime.type}</div>
+            <button class="fav-delete-btn" title="Eliminar de favoritos">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+
+        // Handle delete button specifically to prevent event bubbling
+        const delBtn = item.querySelector('.fav-delete-btn');
+        delBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleFavorite(anime);
+        };
+
+        list.appendChild(item);
+    });
 }
 
 function renderAiringByDay(animes) {
@@ -297,7 +423,14 @@ let currentAnimeEpisodes = [];
 
 window.openProfile = async (id, title) => {
     modal.style.display = 'block';
-    modalTitle.textContent = title;
+    modalTitle.innerHTML = `
+        ${title} 
+        <button id="favToggleBtn" class="glass-btn fav-btn" style="margin-left:10px;">
+            <i class="far fa-heart"></i>
+        </button>
+    `;
+
+    const favBtn = document.getElementById('favToggleBtn');
 
     // Skeleton Loader for Profile
     modalSynopsis.innerHTML = `
@@ -315,15 +448,39 @@ window.openProfile = async (id, title) => {
         const response = await fetch(`/api/anime/${id}`);
         const info = await response.json();
         modalSynopsis.textContent = info.synopsis || 'Sin sinopsis.';
-        currentAnimeEpisodes = info.episodes || []; // Store episodes for next navigation
-        renderEpisodes(currentAnimeEpisodes, info.title);
+        currentAnimeEpisodes = info.episodes || [];
+
+        // Use fetched slug if available, fallback to id
+        const animeSlug = info.slug || id;
+
+        // Update fav button with full data
+        if (favBtn) {
+            updateFavBtnUI(favBtn, animeSlug);
+            favBtn.onclick = () => {
+                toggleFavorite({
+                    slug: animeSlug,
+                    title: info.title,
+                    image_url: info.image_url,
+                    type: info.type
+                });
+                updateFavBtnUI(favBtn, animeSlug);
+            };
+        }
+
+        renderEpisodes(currentAnimeEpisodes, info.title, animeSlug);
     } catch (error) {
         console.error('Error fetching anime info:', error);
         modalSynopsis.textContent = 'Error al cargar la información.';
     }
 };
 
-function renderEpisodes(episodes, animeTitle) {
+function updateFavBtnUI(btn, slug) {
+    const isFav = isFavorite(slug);
+    btn.innerHTML = isFav ? '<i class="fas fa-heart" style="color:var(--secondary-color)"></i>' : '<i class="far fa-heart"></i>';
+    btn.title = isFav ? 'Quitar de favoritos' : 'Agregar a favoritos';
+}
+
+function renderEpisodes(episodes, animeTitle, animeSlug) {
     if (!episodes || episodes.length === 0) {
         episodesList.innerHTML = '<p>No hay episodios.</p>';
         return;
@@ -331,11 +488,15 @@ function renderEpisodes(episodes, animeTitle) {
 
     episodesList.innerHTML = episodes.map(ep => {
         const slug = ep.url.split('ver/')[1];
+        const watched = isEpisodeWatched(animeSlug, ep.number);
+        const watchedClass = watched ? 'watched' : '';
+        const watchedIcon = watched ? '<i class="fas fa-check-circle" style="color:var(--primary-color); margin-left:5px;"></i>' : '';
+
         return `
-        <div class="episode-item">
-            <span style="font-weight:bold; color:var(--primary-color);">EP ${ep.number}</span>
+        <div class="episode-item ${watchedClass}">
+            <span style="font-weight:bold; color:var(--primary-color);">EP ${ep.number} ${watchedIcon}</span>
             <button onclick="openVideo('${slug}', 'Episodio ${ep.number} - ${animeTitle}')" class="view-profile-btn" style="padding: 5px 10px; font-size: 0.8rem;">
-                <i class="fas fa-play"></i> Reproducir
+                <i class="fas fa-play"></i> ${watched ? 'Ver de nuevo' : 'Reproducir'}
             </button>
         </div>
     `}).join('');
@@ -376,7 +537,6 @@ window.openVideo = async (slug, title) => {
     }
 };
 
-// Navigate back to anime profile to select episodes
 window.backToAnimeProfile = function () {
     closeVideoModal();
     if (currentEpisodeInfo.animeSlug) {
@@ -384,10 +544,8 @@ window.backToAnimeProfile = function () {
     }
 };
 
-// Go to next episode
 window.nextEpisode = function () {
     if (!currentAnimeEpisodes || currentAnimeEpisodes.length === 0) {
-        // Fallback to slug increment if no list
         const nextEp = currentEpisodeInfo.episodeNum + 1;
         const nextSlug = `${currentEpisodeInfo.animeSlug}-${nextEp}`;
         const nextTitle = `Episodio ${nextEp} - ${currentEpisodeInfo.animeTitle}`;
@@ -395,10 +553,6 @@ window.nextEpisode = function () {
         return;
     }
 
-    // Find current index and get next
-    const currentIndex = currentAnimeEpisodes.findIndex(ep => ep.number == currentEpisodeInfo.episodeNum);
-    // AnimeFLV usually lists episodes from newest to oldest (descending)
-    // So next episode (higher number) usually has lower index
     const nextEpObj = currentAnimeEpisodes.find(ep => ep.number == currentEpisodeInfo.episodeNum + 1);
 
     if (nextEpObj) {

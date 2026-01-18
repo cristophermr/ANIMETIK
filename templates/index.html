@@ -27,11 +27,25 @@
             <button class="icon-btn" onclick="performSearch()"><i class="fas fa-search"></i></button>
             <button class="icon-btn" onclick="toggleAgenda()" title="Ver Agenda"><i
                     class="fas fa-calendar-alt"></i></button>
+            <button class="icon-btn" onclick="toggleFavorites()" title="Mis Favoritos"><i
+                    class="fas fa-heart"></i></button>
         </div>
     </div>
 
+    <!-- Favorites View -->
+    <div id="favoritesFeed" class="agenda-container" style="display: none;">
+        <h2 style="margin-bottom: 20px;"><i class="fas fa-heart" style="color: var(--secondary-color);"></i> Mis
+            Favoritos</h2>
+        <div id="favoritesList" class="search-results-grid">
+            <!-- Favorites injected by JS -->
+        </div>
+        <button class="back-to-feed-btn bottom-btn" onclick="backToFeed()">
+            <i class="fas fa-arrow-left"></i> Volver al Feed
+        </button>
+    </div>
+
     <!-- Agenda (Por Días) -->
-    <div id="airingFeed" class="agenda-container">
+    <div id="airingFeed" class="agenda-container" style="display: none;">
         <!-- Day sections injected by JS -->
     </div>
 
@@ -73,6 +87,22 @@
             <div id="episodesList"></div>
         </div>
     </div>
+
+    <!-- Footer Policies -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4><i class="fas fa-shield-alt"></i> Seguridad y Privacidad</h4>
+                <p>AnimeTik no almacena ningún video en sus servidores. Todo el contenido es proporcionado por terceros
+                    no afiliados. Esta web funciona únicamente como una interfaz para facilitar el acceso a dicho
+                    contenido.</p>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AnimeTik - Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>

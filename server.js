@@ -6,7 +6,7 @@ const cheerio = require('cheerio');
 const path = require('path');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.static('static'));
@@ -212,7 +212,7 @@ async function getAnimeInfoRobust(slug) {
             }
         });
 
-        return { title, synopsis, score, type, genres, image_url, episodes };
+        return { title, synopsis, score, type, genres, image_url, episodes, slug };
     } catch (e) {
         console.error('Error info:', e.message);
         return null;
