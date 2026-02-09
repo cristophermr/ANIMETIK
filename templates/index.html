@@ -17,7 +17,7 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        primary: '#4f46e5', // Indigo 600 (elegante sobre negro)
+                        primary: '#4f46e5', // Indigo 600
                         secondary: '#ec4899', // Pink 500
                         background: '#000000', // Negro Puro
                         surface: '#18181b', // Zinc 900
@@ -42,10 +42,11 @@
         }
     </script>
     <style>
-        /* Ocultar scrollbar */
+        /* Scrollbar personalizada */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
 
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
@@ -70,7 +71,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
             <div class="flex-shrink-0 cursor-pointer flex items-center gap-2" onclick="window.location.reload()">
-                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center transform rotate-3">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center transform rotate-3 shadow-lg shadow-primary/40">
                     <i class="fas fa-play text-white text-xs"></i>
                 </div>
                 <h1 class="text-xl font-bold tracking-tight text-white">
@@ -78,22 +79,46 @@
                 </h1>
             </div>
 
-            <div class="hidden md:flex flex-1 max-w-lg mx-8 relative group">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-gray-500 group-focus-within:text-primary transition-colors"></i>
-                </div>
+            <div class="hidden md:flex flex-1 max-w-xl mx-8 relative group items-center bg-surface/80 backdrop-blur-md rounded-full border border-white/5 focus-within:border-primary/50 transition-all shadow-lg">
+                <i class="fas fa-search text-gray-500 ml-4"></i>
+
                 <input type="text" id="searchInput"
-                       class="block w-full pl-10 pr-3 py-2.5 border-none rounded-full bg-surface text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-lg"
-                       placeholder="Buscar anime...">
-                <button onclick="performSearch()" class="absolute right-2 top-1.5 bg-surfaceHover p-1.5 rounded-full text-gray-400 hover:text-white transition-colors">
-                    <i class="fas fa-arrow-right"></i>
+                       class="bg-transparent border-none text-gray-300 text-sm w-full px-3 py-2.5 focus:outline-none placeholder-gray-500"
+                       placeholder="Buscar anime (ej. One Piece)...">
+
+                <div class="relative border-l border-white/10 pl-2 mr-1">
+                    <select id="statusFilter" class="bg-transparent text-xs font-bold text-gray-400 border-none py-1 pr-6 pl-2 focus:ring-0 cursor-pointer hover:text-white transition-colors appearance-none">
+                        <option value="" class="bg-surface text-gray-300">Todo</option>
+                        <option value="1" class="bg-surface text-green-400">En Emisión</option>
+                        <option value="2" class="bg-surface text-red-400">Finalizado</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-2 top-1.5 text-[10px] text-gray-500 pointer-events-none"></i>
+                </div>
+
+                <button onclick="performSearch()" class="bg-surfaceHover p-2 rounded-full text-gray-400 hover:text-white hover:bg-primary transition-all mr-1.5 w-8 h-8 flex items-center justify-center">
+                    <i class="fas fa-arrow-right text-xs"></i>
                 </button>
             </div>
 
             <div class="flex items-center gap-4">
-                <button onclick="toggleAgenda()" class="text-gray-400 hover:text-white transition-colors"><i class="far fa-calendar-alt text-lg"></i></button>
-                <button onclick="toggleFavorites()" class="text-gray-400 hover:text-white transition-colors"><i class="far fa-heart text-lg"></i></button>
+                <button onclick="toggleAgenda()" class="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors" title="Agenda Semanal">
+                    <i class="far fa-calendar-alt text-lg"></i>
+                </button>
+                <button onclick="toggleFavorites()" class="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors" title="Mis Favoritos">
+                    <i class="far fa-heart text-lg"></i>
+                </button>
             </div>
+        </div>
+
+        <div class="md:hidden pb-4 flex gap-2">
+            <div class="flex-1 flex items-center bg-surface rounded-full px-4 border border-white/5">
+                <input type="text" id="mobileSearchInput" oninput="document.getElementById('searchInput').value = this.value"
+                       class="w-full bg-transparent border-none py-2 text-sm text-white focus:outline-none"
+                       placeholder="Buscar...">
+            </div>
+            <button onclick="performSearch()" class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg">
+                <i class="fas fa-search"></i>
+            </button>
         </div>
     </div>
 </nav>
@@ -101,73 +126,97 @@
 <main class="min-h-screen pb-20">
 
     <div id="homeView">
-        <div id="heroSlider" class="relative w-full h-[60vh] md:h-[70vh] bg-surface overflow-hidden">
-            <div class="absolute inset-0 flex items-center justify-center text-gray-500">
-                <i class="fas fa-circle-notch fa-spin text-3xl"></i>
+        <div id="heroSlider" class="relative w-full h-[55vh] md:h-[70vh] bg-surface overflow-hidden flex items-center justify-center">
+            <div class="flex flex-col items-center gap-2 text-gray-600">
+                <i class="fas fa-circle-notch fa-spin text-2xl"></i>
+                <span class="text-xs uppercase tracking-widest">Cargando Estrenos</span>
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative z-20">
             <div class="flex items-center gap-3 mb-6">
-                <div class="w-1 h-8 bg-primary rounded-full"></div>
-                <h2 class="text-2xl font-bold text-white">Últimos Episodios</h2>
+                <div class="w-1.5 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(79,70,229,0.5)]"></div>
+                <h2 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Últimos Episodios</h2>
             </div>
 
-            <div id="continueWatching" class="hidden mb-10">
-                <h3 class="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">Continuar Viendo</h3>
-                <div id="historyList" class="flex gap-4 overflow-x-auto hide-scroll pb-2"></div>
+            <div id="continueWatching" class="hidden mb-12 animate-fade-in">
+                <h3 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fas fa-history"></i> Continuar Viendo
+                </h3>
+                <div id="historyList" class="flex gap-4 overflow-x-auto hide-scroll pb-4">
+                </div>
             </div>
 
-            <div id="feedGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+            <div id="feedGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
             </div>
         </div>
     </div>
 
-    <div id="secondaryView" class="hidden pt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div id="secondaryView" class="hidden pt-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen">
         <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
             <h2 id="secondaryTitle" class="text-2xl font-bold text-white">Resultados</h2>
-            <button onclick="backToHome()" class="text-sm text-gray-400 hover:text-white flex items-center gap-2 px-4 py-2 rounded-full bg-surface hover:bg-surfaceHover transition-all">
+            <button onclick="backToHome()" class="text-sm text-gray-400 hover:text-white flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-white/5 hover:bg-surfaceHover transition-all">
                 <i class="fas fa-arrow-left"></i> Volver al Inicio
             </button>
         </div>
-        <div id="secondaryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+        <div id="secondaryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 animate-fade-in">
+        </div>
     </div>
 
 </main>
 
 <div id="episodesModal" class="fixed inset-0 z-[100] hidden">
     <div class="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
-    <div class="absolute inset-x-0 bottom-0 md:top-0 md:inset-0 md:flex md:items-center md:justify-center pointer-events-none">
 
-        <div class="pointer-events-auto bg-surface w-full md:w-[900px] md:h-[600px] md:rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row relative animate-slide-up md:animate-fade-in">
-            <div class="hidden md:block w-1/3 relative">
-                <div id="modalCover" class="absolute inset-0 bg-cover bg-center"></div>
-                <div class="absolute inset-0 bg-black/40"></div>
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
+
+        <div class="pointer-events-auto bg-surface w-full max-w-5xl h-[90vh] md:h-[650px] rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row relative animate-slide-up border border-white/5">
+
+            <div id="modalCover" class="w-full h-56 md:h-full md:w-[350px] bg-cover bg-center relative shrink-0">
+                <div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/50 to-transparent md:hidden"></div>
+                <div class="hidden md:block absolute inset-0 bg-gradient-to-r from-transparent to-surface/50"></div>
+
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/30 md:flex">
+                    <div class="w-16 h-16 rounded-full bg-primary/90 text-white flex items-center justify-center shadow-xl transform scale-90 hover:scale-100 transition-transform cursor-pointer" onclick="alert('Selecciona un episodio de la lista')">
+                        <i class="fas fa-play text-2xl ml-1"></i>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex-1 flex flex-col h-[80vh] md:h-full">
-                <div class="p-6 border-b border-white/5 flex justify-between items-start bg-surfaceHover/50">
-                    <div>
-                        <h3 id="modalTitle" class="text-2xl font-bold text-white mb-1">Título</h3>
-                        <div class="flex gap-2">
-                            <span id="modalType" class="px-2 py-0.5 text-[10px] font-bold bg-primary/20 text-primary rounded border border-primary/20">TV</span>
-                            <span id="modalStatus" class="px-2 py-0.5 text-[10px] font-bold bg-green-500/20 text-green-400 rounded border border-green-500/20">EMISIÓN</span>
+            <div class="flex-1 flex flex-col h-full overflow-hidden bg-surface relative">
+
+                <div class="p-6 border-b border-white/5 flex justify-between items-start bg-surfaceHover/30 z-10 relative backdrop-blur-sm">
+                    <div class="pr-10">
+                        <h3 id="modalTitle" class="text-xl md:text-3xl font-black text-white mb-2 leading-tight tracking-tight">Título del Anime</h3>
+                        <div class="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-wider">
+                            <span id="modalType" class="px-2.5 py-1 bg-primary/20 text-primary rounded border border-primary/20">TV</span>
+                            <span id="modalStatus" class="px-2.5 py-1 bg-green-500/20 text-green-400 rounded border border-green-500/20">Emisión</span>
                         </div>
                     </div>
-                    <button onclick="closeModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+
+                    <button onclick="closeModal()" class="absolute top-4 right-4 md:static w-8 h-8 rounded-full bg-white/5 text-gray-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all z-20">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
 
-                <div class="flex-1 overflow-y-auto p-6">
-                    <p id="modalSynopsis" class="text-gray-400 text-sm leading-relaxed mb-6">Sinopsis...</p>
+                <div class="flex-1 overflow-y-auto p-6 custom-scroll">
+                    <div class="mb-8">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Sinopsis</h4>
+                        <p id="modalSynopsis" class="text-gray-300 text-sm leading-relaxed font-light">
+                            Cargando información...
+                        </p>
+                    </div>
 
-                    <div class="flex items-center justify-between mb-4">
-                        <h4 class="font-bold text-white"><i class="fas fa-list text-primary mr-2"></i>Episodios</h4>
-                        <button id="favToggleBtn" class="text-xs font-bold text-gray-400 hover:text-white flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 hover:border-white transition-all">
-                            <i class="far fa-heart"></i> Favoritos
+                    <div class="flex justify-between items-center mb-4 sticky top-0 bg-surface py-3 z-10 border-b border-white/5 shadow-sm">
+                        <h4 class="font-bold text-white flex items-center gap-2 text-lg">
+                            <i class="fas fa-list-ul text-primary"></i> Episodios
+                        </h4>
+                        <button id="favToggleBtn" class="text-xs font-bold text-gray-400 px-4 py-2 rounded-full border border-white/10 hover:border-white hover:text-white transition-all flex items-center gap-2 bg-surfaceHover">
+                            <i class="far fa-heart"></i> <span>Añadir a Favoritos</span>
                         </button>
                     </div>
 
-                    <div id="episodesList" class="grid grid-cols-1 gap-2">
+                    <div id="episodesList" class="grid gap-2 pb-10">
                     </div>
                 </div>
             </div>
@@ -176,22 +225,30 @@
 </div>
 
 <div id="videoModal" class="fixed inset-0 z-[200] hidden bg-black">
-    <div class="flex flex-col h-full">
+    <div class="flex flex-col h-full relative">
         <div class="absolute top-0 w-full p-4 flex justify-between items-center z-20 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
-            <button onclick="closeVideoModal()" class="pointer-events-auto bg-white/10 backdrop-blur-md hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all">
+            <button onclick="closeVideoModal()" class="pointer-events-auto bg-white/10 backdrop-blur-md hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all border border-white/10">
                 <i class="fas fa-chevron-left"></i>
             </button>
+            <div class="pointer-events-auto bg-black/60 backdrop-blur-md px-4 py-1 rounded-full border border-white/10">
+                <span class="text-xs font-bold text-gray-300">Reproduciendo</span>
+            </div>
         </div>
 
-        <iframe id="videoFrame" src="" class="w-full h-full border-0" allowfullscreen></iframe>
+        <div class="flex-1 bg-black flex items-center justify-center">
+            <iframe id="videoFrame" src="" class="w-full h-full border-0" allowfullscreen></iframe>
+        </div>
 
-        <div class="bg-surface border-t border-white/10 p-4 pb-8">
+        <div class="bg-surface border-t border-white/10 p-4 pb-8 safe-area-bottom">
             <div class="max-w-7xl mx-auto">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-bold text-gray-500 uppercase">Servidores</span>
-                    <button onclick="nextEpisode()" class="text-xs font-bold bg-primary text-white px-3 py-1 rounded hover:bg-indigo-500 transition-colors">Siguiente Ep <i class="fas fa-forward ml-1"></i></button>
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Servidores Disponibles</span>
+                    <button onclick="nextEpisode()" class="text-xs font-bold bg-primary text-white px-4 py-2 rounded-full hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20 flex items-center gap-2">
+                        Siguiente <i class="fas fa-forward"></i>
+                    </button>
                 </div>
-                <div id="serverList" class="flex gap-2 overflow-x-auto hide-scroll"></div>
+                <div id="serverList" class="flex gap-2 overflow-x-auto hide-scroll pb-2">
+                </div>
             </div>
         </div>
     </div>

@@ -7,7 +7,7 @@ const path = require('path');
 const NodeCache = require('node-cache');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 
 // Configuración de Caché
 const cache = new NodeCache({ stdTTL: 300, checkperiod: 120 });
