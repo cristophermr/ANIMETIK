@@ -1,16 +1,20 @@
 {
-  "name": "python",
-  "version": "1.0.0",
-  "description": "",
+  "name": "animetik-server",
+  "version": "1.0.1",
+  "description": "Servidor optimizado para AnimeTik",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "dev": "node --watch server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "anime",
+    "streaming",
+    "server"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "@consumet/extensions": "^1.8.7",
     "animeflv-api": "^2.0.0",
@@ -18,7 +22,8 @@
     "cheerio": "^1.1.2",
     "cloudscraper": "^4.6.0",
     "cors": "^2.8.5",
-    "express": "^5.2.1",
+    "express": "^4.18.2",
+    "node-cache": "^5.1.2",
     "request-promise": "^4.2.6"
   }
 }

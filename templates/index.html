@@ -1,110 +1,202 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimeTik</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <title>AnimeTik Black</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#4f46e5', // Indigo 600 (elegante sobre negro)
+                        secondary: '#ec4899', // Pink 500
+                        background: '#000000', // Negro Puro
+                        surface: '#18181b', // Zinc 900
+                        surfaceHover: '#27272a', // Zinc 800
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)' },
+                            '100%': { transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Ocultar scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Efecto de desvanecimiento para el Slider */
+        .fade-slide {
+            transition: opacity 1s ease-in-out;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            z-index: 0;
+        }
+        .fade-slide.active { opacity: 1; z-index: 10; }
+    </style>
 </head>
+<body class="bg-background text-white font-sans antialiased overflow-x-hidden selection:bg-primary selection:text-white">
 
-<body>
-
-    <!-- Top Bar Search -->
-    <div class="top-bar">
-        <div class="branding">
-            <h1 class="logo-text">ANIME<span>TIK</span></h1>
-        </div>
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Buscar anime...">
-            <select id="statusFilter">
-                <option value="">Status</option>
-                <option value="1">Airing</option>
-                <option value="2">Done</option>
-            </select>
-            <button class="icon-btn" onclick="performSearch()"><i class="fas fa-search"></i></button>
-            <button class="icon-btn" onclick="toggleAgenda()" title="Ver Agenda"><i
-                    class="fas fa-calendar-alt"></i></button>
-            <button class="icon-btn" onclick="toggleFavorites()" title="Mis Favoritos"><i
-                    class="fas fa-heart"></i></button>
-        </div>
-    </div>
-
-    <!-- Favorites View -->
-    <div id="favoritesFeed" class="agenda-container" style="display: none;">
-        <h2 style="margin-bottom: 20px;"><i class="fas fa-heart" style="color: var(--secondary-color);"></i> Mis
-            Favoritos</h2>
-        <div id="favoritesList" class="search-results-grid">
-            <!-- Favorites injected by JS -->
-        </div>
-        <button class="back-to-feed-btn bottom-btn" onclick="backToFeed()">
-            <i class="fas fa-arrow-left"></i> Volver al Feed
-        </button>
-    </div>
-
-    <!-- Agenda (Por Días) -->
-    <div id="airingFeed" class="agenda-container" style="display: none;">
-        <!-- Day sections injected by JS -->
-    </div>
-
-    <!-- Main Vertical Feed -->
-    <div class="feed-container" id="animeFeed">
-        <!-- Slides injected by JS -->
-    </div>
-
-    <!-- Modal Video Player -->
-    <div id="videoModal" class="modal" style="z-index: 250;">
-        <div class="modal-content"
-            style="padding:0; background:black; display:flex; flex-direction:column; height: 80vh;">
-            <div class="video-header">
-                <div class="video-nav-btns">
-                    <button class="glass-btn" onclick="backToAnimeProfile()"><i class="fas fa-list"></i>
-                        Episodios</button>
-                    <button class="glass-btn" onclick="nextEpisode()"><i class="fas fa-forward"></i> Siguiente</button>
+<nav class="fixed top-0 w-full z-50 bg-gradient-to-b from-black/90 to-transparent transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <div class="flex-shrink-0 cursor-pointer flex items-center gap-2" onclick="window.location.reload()">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center transform rotate-3">
+                    <i class="fas fa-play text-white text-xs"></i>
                 </div>
-                <span id="videoTitle"
-                    style="color:white; font-weight:bold; flex:1; text-align:center;">Reproduciendo</span>
-                <span class="close-btn" onclick="closeVideoModal()"
-                    style="color:white; font-size:24px; cursor:pointer;">&times;</span>
+                <h1 class="text-xl font-bold tracking-tight text-white">
+                    ANIME<span class="text-primary">TIK</span>
+                </h1>
             </div>
-            <div id="serverList"
-                style="padding: 10px; background: #1a1a1a; display: flex; overflow-x: auto; gap: 10px;"></div>
-            <div style="flex:1; position:relative; background: #000;">
-                <iframe id="videoFrame" src="" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
+
+            <div class="hidden md:flex flex-1 max-w-lg mx-8 relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-500 group-focus-within:text-primary transition-colors"></i>
+                </div>
+                <input type="text" id="searchInput"
+                       class="block w-full pl-10 pr-3 py-2.5 border-none rounded-full bg-surface text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-lg"
+                       placeholder="Buscar anime...">
+                <button onclick="performSearch()" class="absolute right-2 top-1.5 bg-surfaceHover p-1.5 rounded-full text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button onclick="toggleAgenda()" class="text-gray-400 hover:text-white transition-colors"><i class="far fa-calendar-alt text-lg"></i></button>
+                <button onclick="toggleFavorites()" class="text-gray-400 hover:text-white transition-colors"><i class="far fa-heart text-lg"></i></button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="min-h-screen pb-20">
+
+    <div id="homeView">
+        <div id="heroSlider" class="relative w-full h-[60vh] md:h-[70vh] bg-surface overflow-hidden">
+            <div class="absolute inset-0 flex items-center justify-center text-gray-500">
+                <i class="fas fa-circle-notch fa-spin text-3xl"></i>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-1 h-8 bg-primary rounded-full"></div>
+                <h2 class="text-2xl font-bold text-white">Últimos Episodios</h2>
+            </div>
+
+            <div id="continueWatching" class="hidden mb-10">
+                <h3 class="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">Continuar Viendo</h3>
+                <div id="historyList" class="flex gap-4 overflow-x-auto hide-scroll pb-2"></div>
+            </div>
+
+            <div id="feedGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
             </div>
         </div>
     </div>
 
-    <!-- Modal Perfil/Episodios -->
-    <div id="episodesModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle" style="margin-bottom:10px;">Título</h2>
-            <p id="modalSynopsis" style="color:#aaa; font-size:0.9rem; margin-bottom:20px;">Sinopsis...</p>
-            <h3 style="margin-bottom:15px;">Episodios</h3>
-            <div id="episodesList"></div>
+    <div id="secondaryView" class="hidden pt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
+            <h2 id="secondaryTitle" class="text-2xl font-bold text-white">Resultados</h2>
+            <button onclick="backToHome()" class="text-sm text-gray-400 hover:text-white flex items-center gap-2 px-4 py-2 rounded-full bg-surface hover:bg-surfaceHover transition-all">
+                <i class="fas fa-arrow-left"></i> Volver al Inicio
+            </button>
         </div>
+        <div id="secondaryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
     </div>
 
-    <!-- Footer Policies -->
-    <footer class="main-footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4><i class="fas fa-shield-alt"></i> Seguridad y Privacidad</h4>
-                <p>AnimeTik no almacena ningún video en sus servidores. Todo el contenido es proporcionado por terceros
-                    no afiliados. Esta web funciona únicamente como una interfaz para facilitar el acceso a dicho
-                    contenido.</p>
+</main>
+
+<div id="episodesModal" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 md:top-0 md:inset-0 md:flex md:items-center md:justify-center pointer-events-none">
+
+        <div class="pointer-events-auto bg-surface w-full md:w-[900px] md:h-[600px] md:rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row relative animate-slide-up md:animate-fade-in">
+            <div class="hidden md:block w-1/3 relative">
+                <div id="modalCover" class="absolute inset-0 bg-cover bg-center"></div>
+                <div class="absolute inset-0 bg-black/40"></div>
             </div>
-            <div class="footer-divider"></div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 AnimeTik - Todos los derechos reservados.</p>
+
+            <div class="flex-1 flex flex-col h-[80vh] md:h-full">
+                <div class="p-6 border-b border-white/5 flex justify-between items-start bg-surfaceHover/50">
+                    <div>
+                        <h3 id="modalTitle" class="text-2xl font-bold text-white mb-1">Título</h3>
+                        <div class="flex gap-2">
+                            <span id="modalType" class="px-2 py-0.5 text-[10px] font-bold bg-primary/20 text-primary rounded border border-primary/20">TV</span>
+                            <span id="modalStatus" class="px-2 py-0.5 text-[10px] font-bold bg-green-500/20 text-green-400 rounded border border-green-500/20">EMISIÓN</span>
+                        </div>
+                    </div>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-6">
+                    <p id="modalSynopsis" class="text-gray-400 text-sm leading-relaxed mb-6">Sinopsis...</p>
+
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-bold text-white"><i class="fas fa-list text-primary mr-2"></i>Episodios</h4>
+                        <button id="favToggleBtn" class="text-xs font-bold text-gray-400 hover:text-white flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 hover:border-white transition-all">
+                            <i class="far fa-heart"></i> Favoritos
+                        </button>
+                    </div>
+
+                    <div id="episodesList" class="grid grid-cols-1 gap-2">
+                    </div>
+                </div>
             </div>
         </div>
-    </footer>
+    </div>
+</div>
 
-    <script src="script.js"></script>
+<div id="videoModal" class="fixed inset-0 z-[200] hidden bg-black">
+    <div class="flex flex-col h-full">
+        <div class="absolute top-0 w-full p-4 flex justify-between items-center z-20 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
+            <button onclick="closeVideoModal()" class="pointer-events-auto bg-white/10 backdrop-blur-md hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+
+        <iframe id="videoFrame" src="" class="w-full h-full border-0" allowfullscreen></iframe>
+
+        <div class="bg-surface border-t border-white/10 p-4 pb-8">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-gray-500 uppercase">Servidores</span>
+                    <button onclick="nextEpisode()" class="text-xs font-bold bg-primary text-white px-3 py-1 rounded hover:bg-indigo-500 transition-colors">Siguiente Ep <i class="fas fa-forward ml-1"></i></button>
+                </div>
+                <div id="serverList" class="flex gap-2 overflow-x-auto hide-scroll"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
 </body>
-
 </html>
